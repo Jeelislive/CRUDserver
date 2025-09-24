@@ -1,172 +1,107 @@
-# Chat App Monorepo
+ # CRUDserver
 
-This repository contains a React (Vite) frontend in `client/` and a Node.js/Express backend in `server/`.
+ A minimal Node.js/Express REST API that provides basic Create, Read, Update, and Delete operations. Organized with controllers, routes, and configuration. Includes SQL scripts for schema and seed data.
 
-- Frontend: Vite + React 18, Material UI, Redux Toolkit
-- Backend: Express, Socket.IO, MongoDB (Mongoose)
-- Node version: 20.x
+ ## Features
+ - RESTful CRUD endpoints
+ - Modular structure (`controllers/`, `routes/`, `config/`)
+ - Environment-based configuration via `.env`
+ - SQL schema and seed scripts in `sql/`
 
-## Project Structure
+ ## Tech Stack
+ - Node.js, Express
+ - SQL database (MySQL or PostgreSQL)
+ - Optional: dotenv, cors, helmet, validation
 
-```
-chat-app/
-├─ client/           # Vite React app
-│  ├─ src/
-│  ├─ public/
-│  ├─ package.json
-│  └─ vite.config.js
-├─ server/           # Express API + Socket.IO
-│  ├─ app.js
-│  ├─ routes/
-│  ├─ controllers/
-│  ├─ models/
-│  ├─ middlewares/
-│  ├─ utils/
-│  └─ package.json
-├─ render.yaml       # Render deployment (server)
-├─ start.sh          # Helper to start server from root
-├─ build.sh          # Helper to build/install server from root
-├─ package.json      # Root scripts (server-focused)
-└─ README.md         # This file
-```
+ ## Prerequisites
+ - Node.js 18+ and npm
+ - A running SQL database
+ - Database user with create/read/write access
 
-## Prerequisites
+ ## Project Structure
+ ```
+ CRUDserver/
+ ├─ config/         # Database and app configuration
+ ├─ controllers/    # Request handlers / business logic
+ ├─ routes/         # API route definitions
+ ├─ sql/            # Database schema and seed files
+ ├─ server.js       # App entry point (or app.js/index.js)
+ ├─ .env.sample     # Example environment variables
+ ├─ package.json
+ └─ README.md
+ ```
 
-- Node.js 20.x
-- npm
-- MongoDB connection string (for backend)
+ ## Setup
 
-## Environment Variables
+ 1) Install dependencies
+ ```bash
+ npm install
+ ```
 
-Create and fill `.env` files in both `client/` and `server/`.
+ 2) Configure environment
+ - Copy `.env.sample` to `.env` and fill in values.
+ ```bash
+ cp .env.sample .env
+ ```
+ Typical variables:
+ ```
+ PORT=3000
+ DB_HOST=localhost
+ DB_PORT=5432
+ DB_USER=your_user
+ DB_PASSWORD=your_password
+ DB_NAME=your_database
+ ```
 
-- `server/.env` (example):
-```
-PORT=10000
-MONGODB_URI=mongodb://localhost:27017/chatapp
-JWT_SECRET=replace_with_strong_secret
-CORS_ORIGIN=http://localhost:5173
-CLOUDINARY_CLOUD_NAME=
-CLOUDINARY_API_KEY=
-CLOUDINARY_API_SECRET=
-GOOGLE_CLIENT_ID=
-```
+ 3) Initialize database
+ - Create the database if needed.
+ - Run SQL files in `sql/` (e.g., `schema.sql`, then `seed.sql`) using your DB client or CLI.
 
-- `client/.env` (Vite uses VITE_ prefix):
-```
-VITE_API_URL=http://localhost:10000
-VITE_SOCKET_URL=http://localhost:10000
-VITE_GOOGLE_CLIENT_ID=
-```
+ ## Run
 
-Adjust values to your setup.
+ - Development:
+ ```bash
+ npm run dev
+ ```
 
-## Install
+ - Production:
+ ```bash
+ npm start
+ ```
 
-Install dependencies separately for client and server.
+ Server runs at:
+ ```
+ http://localhost:<PORT from .env>
+ ```
 
-- Server:
-```bash
-cd server
-npm ci
-```
+ ## API Overview
 
-- Client:
-```bash
-cd client
-npm ci
-```
+ Adjust to match your actual routes.
 
-Alternatively, from the repo root (server only per root scripts):
-```bash
-npm install
-```
-This runs `npm ci` inside `server/`.
+ - GET `/api/items` — list all items
+ - GET `/api/items/:id` — get item by id
+ - POST `/api/items` — create item
+ - PUT `/api/items/:id` — update item
+ - DELETE `/api/items/:id` — delete item
 
-## Development
+ Example:
+ ```bash
+ curl -X POST http://localhost:3000/api/items \
+   -H "Content-Type: application/json" \
+   -d '{"name":"Sample","description":"Demo item"}'
+ ```
 
-Run server and client in separate terminals.
+ ## Scripts
 
-- Backend (Express):
-```bash
-cd server
-npm run dev
-```
-Starts on `http://localhost:10000` by default (configurable via `PORT`).
+ - `npm start` — start server
+ - `npm run dev` — start with nodemon (if configured)
+ - `npm test` — run tests (add when available)
 
-- Frontend (Vite):
-```bash
-cd client
-npm run dev
-```
-Vite dev server defaults to `http://localhost:5173`.
+ ## Troubleshooting
+ - Check DB connection params and network access.
+ - Ensure SQL scripts ran successfully.
+ - If port is in use, change `PORT` in `.env`.
 
-Ensure CORS/allowed origins in the server `.env` match the client URL.
+ ## License
+ No license specified. Add one (e.g., MIT) if you plan to distribute.
 
-## Production Builds
-
-- Client production build:
-```bash
-cd client
-npm run build
-```
-Outputs to `client/dist/`.
-
-- Server production start:
-```bash
-cd server
-npm start
-```
-
-Root-level helpers:
-```bash
-./build.sh   # runs server install (npm ci) from root
-./start.sh   # runs server start from root
-```
-
-## Deployment
-
-This repo includes `render.yaml` to deploy the backend on Render:
-
-- Build: `cd server && npm ci`
-- Start: `cd server && npm start`
-- PORT is set to `10000` in `render.yaml`. Render also provides `PORT` in env; prefer using `process.env.PORT` in `server/app.js`.
-
-If deploying the client separately (e.g., Vercel/Netlify):
-- Build command: `npm run build`
-- Output directory: `dist`
-- Set `VITE_API_URL` and `VITE_SOCKET_URL` to your deployed backend URL.
-
-## Scripts Overview
-
-- Root `package.json`:
-  - `install`: install server deps
-  - `build`: install server deps (for platforms expecting a build step)
-  - `start`: start server from root
-
-- `server/package.json`:
-  - `start`: `node app.js`
-  - `dev`: `nodemon app.js`
-
-- `client/package.json`:
-  - `dev`: `vite`
-  - `build`: `vite build --mode production`
-  - `preview`: `vite preview`
-
-## API and WebSocket
-
-- REST API base URL: `${SERVER_URL}` (e.g., `http://localhost:10000`)
-- WebSocket (Socket.IO) URL: same as server URL unless configured otherwise.
-
-Update the client to read from `VITE_API_URL`/`VITE_SOCKET_URL`.
-
-## Troubleshooting
-
-- Check Node version (must be 20.x).
-- If client cannot reach server, verify `VITE_API_URL`, `CORS_ORIGIN`, and ports.
-- For MongoDB connection issues, validate `MONGODB_URI` and that MongoDB is running.
-- On Render, ensure required env vars are configured in the dashboard.
-
-## License
-
-No license provided. Add one if you intend to share or reuse this code.
